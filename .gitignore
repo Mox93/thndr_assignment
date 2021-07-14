@@ -1,0 +1,11 @@
+__pycache__
+
+# Assigment
+thndr_programming_assignment.pdf
+
+# Vertula Environment
+.venv
+
+# IDE
+.idea
+.vscode
