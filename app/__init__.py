@@ -1,45 +1,24 @@
 from fastapi import FastAPI
 
-from .models import (
-    Buy,
-    Deposit,
-    Sell,
-    Stock,
-    StockRequest,
-    User,
-    UserRequest,
-    Withdraw,
-)
+from .api import funds, trade, info
+from .db import BaseDB
 
 
 app = FastAPI()
 
 
-@app.post("/deposit", tags=["Balance"])
-def deposit(info: Deposit):
-    pass
+@app.on_event("startup")
+async def startup():
+    from .utils.settings import settings
+
+    await BaseDB.connect(settings().pg_dsn)
 
 
-@app.post("/withdraw", tags=["Balance"])
-def withdraw(info: Withdraw):
-    pass
+@app.on_event("shutdown")
+async def shutdown():
+    await BaseDB.disconnect()
 
 
-@app.post("/buy", tags=["Stock"])
-def buy(info: Buy):
-    pass
-
-
-@app.post("/sell", tags=["Stock"])
-def sell(info: Sell):
-    pass
-
-
-@app.post("/stock", response_model=Stock, tags=["Info"])
-def stock(info: StockRequest) -> Stock:
-    pass
-
-
-@app.post("/user", response_model=User, tags=["Info"])
-def user(info: UserRequest) -> User:
-    pass
+app.include_router(funds.router)
+app.include_router(trade.router)
+app.include_router(info.router)
