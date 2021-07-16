@@ -57,3 +57,15 @@ class BaseDB:
 
         async with cls.__pool__.acquire() as conn:
             return await conn.fetchrow(query, *values)
+
+    @classmethod
+    async def fetch_many(cls, **kwargs):
+        query = f" SELECT * FROM \"{cls.__table_name__}\" "
+
+        keys, values = list(zip(*kwargs.items()))
+
+        conditions = " AND ".join(f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1))
+        query += f" WHERE {conditions} "
+
+        async with cls.__pool__.acquire() as conn:
+            return await conn.fetch(query, *values)
