@@ -10,12 +10,16 @@ class StockRequest(BaseModel):
 
 class BaseStock(StockRequest):
     name: str
-    price: float
 
 
 class Stock(BaseStock):
+    price: float
     availability: int
     timestamp: datetime
+
+
+class OwnedStock(BaseStock):
+    total: int
 
 
 class StockInDB(BaseModel):

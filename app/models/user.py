@@ -1,13 +1,9 @@
-from typing import List
+from typing import Set
 from uuid import UUID
 
 from pydantic import BaseModel
 
-from .stock import BaseStock
-
-
-class OwnedStock(BaseStock):
-    total: int
+from .stock import OwnedStock
 
 
 class UserRequest(BaseModel):
@@ -17,7 +13,7 @@ class UserRequest(BaseModel):
 class User(UserRequest):
     name: str
     balance: float
-    stoke: List[OwnedStock]
+    stoke: Set[OwnedStock]
 
 
 class UserInDB(BaseModel):
