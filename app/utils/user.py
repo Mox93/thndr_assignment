@@ -2,19 +2,20 @@ from uuid import UUID
 
 from fastapi import HTTPException
 
+from .stock import get_owned_stock
 from ..db.user import UserDB
 from ..models.user import User, UserInDB
 
 
 async def get_user(user_id: UUID) -> User:
-    user_db = await UserDB.fetch(id=user_id)
+    user_db = await UserDB.fetch_one(id=user_id)
 
     if not user_db:
         raise HTTPException(404, "User Not Found")
 
     user_db = UserInDB.parse_obj(user_db)
 
-    stock = []
+    stock = await get_owned_stock(user_id)
 
     return User(
         user_id=user_db.id,
