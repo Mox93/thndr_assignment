@@ -6,6 +6,9 @@ thndr_programming_assignment.pdf
 # Vertula Environment
 .venv
 
+# Environment Variables
+.env*
+
 # IDE
 .idea
 .vscode

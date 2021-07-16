@@ -17,5 +17,3 @@ services:
         image: thndr/streamer:0.2
         depends_on:
             - vernemq
-
-
