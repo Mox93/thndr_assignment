@@ -1,8 +1,9 @@
 from . import BaseDB
+from .user import UserDB
 
 
 class StockDB(BaseDB):
-    __table_name__ = "stocks"
+    __table_name__ = "stock"
 
     @classmethod
     async def create(cls):
@@ -12,18 +13,18 @@ class StockDB(BaseDB):
                 id uuid PRIMARY KEY,
                 name varchar(256)
             );
-            """)
+""")
 
 
-class StockPriceDB(BaseDB):
-    __table_name__ = "stock_prices"
+class StockStreamDB(BaseDB):
+    __table_name__ = "stock_stream"
 
     @classmethod
     async def create(cls):
         async with cls.__pool__.acquire() as conn:
             await conn.execute(f"""
             CREATE TABLE IF NOT EXISTS {cls.__table_name__}(
-                stock_id uuid REFERENCES {StockDB.__table_name__}(id),
+                stock_id uuid REFERENCES {StockDB.__table_name__}(id)  NOT NULL,
                 timestamp timestamp NOT NULL,
                 price real NOT NULL,
                 availability integer NOT NULL

@@ -20,7 +20,7 @@ class Order:
         type_ = "ASC" if self.asc else "DESC"
         columns = ", ".join(self.columns)
 
-        return f"ORDER BY {columns} {type_}"
+        return f" ORDER BY {columns} {type_} "
 
 
 class BaseDB:
@@ -44,13 +44,13 @@ class BaseDB:
         raise NotImplementedError()
 
     @classmethod
-    async def fetch(cls, *, __order__: Order = None, **kwargs):
-        query = f"SELECT * FROM \"{cls.__table_name__}\" "
+    async def fetch_one(cls, *, __order__: Order = None, **kwargs):
+        query = f" SELECT * FROM \"{cls.__table_name__}\" "
 
         keys, values = list(zip(*kwargs.items()))
 
         conditions = " AND ".join(f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1))
-        query += f" WHERE {conditions}"
+        query += f" WHERE {conditions} "
 
         if __order__:
             query += __order__.query()
