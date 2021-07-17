@@ -13,7 +13,7 @@ class UserRequest(BaseModel):
 class User(UserRequest):
     name: str
     balance: float
-    stoke: Set[OwnedStock]
+    stock: Set[OwnedStock]
 
 
 class UserInDB(BaseModel):
