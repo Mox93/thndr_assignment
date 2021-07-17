@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 from asyncpg import Pool, create_pool
 
@@ -66,6 +66,33 @@ class BaseDB:
 
         conditions = " AND ".join(f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1))
         query += f" WHERE {conditions} "
+
+        async with cls.__pool__.acquire() as conn:
+            return await conn.fetch(query, *values)
+
+    @classmethod
+    async def update(cls, updates: Dict[str, Any], **kwargs):
+        if not updates:
+            return
+
+        keys, values = [x for x in zip(*updates.items())]
+        changes = ", ".join(
+            f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1)
+        )
+        query = f"UPDATE \"{cls.__table_name__}\" SET {changes} "
+
+        if kwargs:
+            keys, values_ = [x for x in zip(*kwargs.items())]
+            conditions = " AND ".join(
+                f"\"{key}\" = ${i}" for i, key in enumerate(keys, len(values) + 1)
+            )
+            query += f" WHERE {conditions} "
+            values += values_
+
+        query += f"RETURNING *;"
+
+        print(query)
+        print(values)
 
         async with cls.__pool__.acquire() as conn:
             return await conn.fetch(query, *values)
