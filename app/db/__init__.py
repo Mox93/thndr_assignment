@@ -45,12 +45,15 @@ class BaseDB:
 
     @classmethod
     async def fetch_one(cls, *, __order__: Order = None, **kwargs):
-        query = f" SELECT * FROM \"{cls.__table_name__}\" "
+        query = f"SELECT * FROM \"{cls.__table_name__}\" "
+        values = []
 
-        keys, values = list(zip(*kwargs.items()))
-
-        conditions = " AND ".join(f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1))
-        query += f" WHERE {conditions} "
+        if kwargs:
+            keys, values = [x for x in zip(*kwargs.items())]
+            conditions = " AND ".join(
+                f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1)
+            )
+            query += f" WHERE {conditions} "
 
         if __order__:
             query += __order__.query()
@@ -60,12 +63,15 @@ class BaseDB:
 
     @classmethod
     async def fetch_many(cls, **kwargs):
-        query = f" SELECT * FROM \"{cls.__table_name__}\" "
+        query = f"SELECT * FROM \"{cls.__table_name__}\" "
+        values = []
 
-        keys, values = list(zip(*kwargs.items()))
-
-        conditions = " AND ".join(f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1))
-        query += f" WHERE {conditions} "
+        if kwargs:
+            keys, values = [x for x in zip(*kwargs.items())]
+            conditions = " AND ".join(
+                f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1)
+            )
+            query += f" WHERE {conditions} "
 
         async with cls.__pool__.acquire() as conn:
             return await conn.fetch(query, *values)
