@@ -11,7 +11,7 @@ class StockDB(BaseDB):
             await conn.execute(f"""
             CREATE TABLE IF NOT EXISTS {cls.__table_name__}(
                 id uuid PRIMARY KEY,
-                name varchar(256)
+                name varchar(256) NOT NULL
             );
 """)
 
@@ -42,7 +42,7 @@ class OwnedStockDB(BaseDB):
             CREATE TABLE IF NOT EXISTS {cls.__table_name__}(
                 user_id uuid REFERENCES "{UserDB.__table_name__}"(id) NOT NULL,
                 stock_id uuid REFERENCES {StockDB.__table_name__}(id) NOT NULL,
-                name varchar(256),
+                name varchar(256) NOT NULL,
                 total integer NOT NULL,
                 UNIQUE(user_id, stock_id)
             );

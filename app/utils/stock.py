@@ -1,4 +1,4 @@
-from typing import Set
+from typing import List
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -28,7 +28,7 @@ async def get_stock(stock_id: UUID) -> Stock:
     )
 
 
-async def get_owned_stock(user_id: UUID) -> Set[OwnedStock]:
+async def get_owned_stock(user_id: UUID) -> List[OwnedStock]:
     owned_stock_db = await OwnedStockDB.fetch_many(user_id=user_id)
 
-    return {OwnedStock(**stock) for stock in owned_stock_db}
+    return [OwnedStock.parse_obj(stock) for stock in owned_stock_db]

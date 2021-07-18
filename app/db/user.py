@@ -10,7 +10,7 @@ class UserDB(BaseDB):
             await conn.execute(f"""
             CREATE TABLE IF NOT EXISTS "{cls.__table_name__}"(
                 id uuid PRIMARY KEY,
-                name varchar(256),
-                balance double precision
+                name varchar(256) NOT NULL,
+                balance double precision NOT NULL
             );
 """)
