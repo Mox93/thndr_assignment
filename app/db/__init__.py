@@ -77,10 +77,18 @@ class BaseDB:
             return await conn.fetch(query, *values)
 
     @classmethod
-    async def update(cls, updates: Dict[str, Any], **kwargs):
-        if not updates:
-            return
+    async def insert(cls, data: Dict[str, Any]):
+        keys, values = [x for x in zip(*data.items())]
+        query = f"""
+        INSERT INTO {cls.__table_name__} ({", ".join(keys)})
+        VALUES ({", ".join(f"${i + 1}" for i in range(len(values)))})
+"""
 
+        async with cls.__pool__.acquire() as conn:
+            return await conn.fetch(query, *values)
+
+    @classmethod
+    async def update(cls, updates: Dict[str, Any], **kwargs):
         keys, values = [x for x in zip(*updates.items())]
         changes = ", ".join(
             f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1)
@@ -96,9 +104,6 @@ class BaseDB:
             values += values_
 
         query += f"RETURNING *;"
-
-        print(query)
-        print(values)
 
         async with cls.__pool__.acquire() as conn:
             return await conn.fetch(query, *values)
