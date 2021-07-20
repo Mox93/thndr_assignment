@@ -10,10 +10,35 @@ services:
         image: erlio/docker-vernemq
 
     streamer:
-        environment:
-            - MQTT_HOST=vernemq
-            - MQTT_PORT=1883
-            - MQTT_TOPIC=thndr-trading
-        image: thndr/streamer:0.2
-        depends_on:
-            - vernemq
+      env_file:
+        - .env
+      image: thndr/streamer:0.2
+      depends_on:
+        - vernemq
+
+    thndr-api:
+      build: .
+      ports:
+        - 8000:80
+      env_file:
+        - .env
+      depends_on:
+        - thndr-db
+
+    thndr-db:
+      image: postgres
+      volumes:
+        - thndr-data:/var/lib/thndr/data/
+      env_file:
+        - .env
+
+    consumer:
+      env_file:
+        - .env
+      build: stream_consumer
+      depends_on:
+        - streamer
+        - thndr-api
+
+volumes:
+ thndr-data:
