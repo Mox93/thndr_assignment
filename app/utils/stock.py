@@ -22,7 +22,6 @@ async def get_stock(stock_id: UUID) -> Stock:
     )
 
     return Stock(
-        stock_id=stock_db.id,
         name=stock_db.name,
         **stock_price
     )

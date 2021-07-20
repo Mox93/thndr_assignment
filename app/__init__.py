@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from .api import funds, trade, info
 from .db import BaseDB
+from .internal import internal
 
 
 app = FastAPI()
@@ -22,3 +23,5 @@ async def shutdown():
 app.include_router(funds.router)
 app.include_router(trade.router)
 app.include_router(info.router)
+
+app.mount("/internal", internal)
