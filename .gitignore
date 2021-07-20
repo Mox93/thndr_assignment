@@ -1,6 +1,6 @@
 __pycache__
 
-# Assigment
+# Assignment
 thndr_programming_assignment.pdf
 
 # Vertula Environment
@@ -8,6 +8,7 @@ thndr_programming_assignment.pdf
 
 # Environment Variables
 .env*
+!.env.example
 
 # IDE
 .idea
