@@ -10,8 +10,11 @@ class UserRequest(BaseModel):
     user_id: UUID
 
 
-class User(UserRequest):
+class UserCreate(UserRequest):
     name: str
+
+
+class User(UserCreate):
     balance: float
     stock: List[OwnedStock]
 
