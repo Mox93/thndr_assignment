@@ -4,6 +4,7 @@ from .db.stock import StockDB, StockStreamDB
 from .db.user import UserDB
 from .models.stock import Stock
 from .models.user import UserCreate, UserInDB
+from .utils.trade import resolve_sellers, resolve_buyers
 
 
 internal = FastAPI()
@@ -11,6 +12,9 @@ internal = FastAPI()
 
 @internal.post("/stock_stream")
 async def add_stock_stream(info: Stock):
+    info = await resolve_sellers(info)
+    info = await resolve_buyers(info)
+
     stock_db = await StockDB.fetch_one(id=info.stock_id)
 
     if not stock_db:
