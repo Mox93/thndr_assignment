@@ -23,6 +23,22 @@ class Order:
         return f" ORDER BY {columns} {type_} "
 
 
+class Le:
+    def __init__(self, value):
+        self.value = value
+
+    def query(self, key, i) -> Tuple[str, Any, int]:
+        return f"\"{key}\" <= ${i}", self.value, i + 1
+
+
+class Ge:
+    def __init__(self, value):
+        self.value = value
+
+    def query(self, key, i) -> Tuple[str, Any, int]:
+        return f"\"{key}\" >= ${i}", self.value, i + 1
+
+
 class BaseDB:
     __pool__: Pool
     __table_name__: str
@@ -45,15 +61,10 @@ class BaseDB:
 
     @classmethod
     async def fetch_one(cls, *, __order__: Order = None, **kwargs):
-        query = f"SELECT * FROM \"{cls.__table_name__}\" "
-        values = []
-
-        if kwargs:
-            keys, values = [x for x in zip(*kwargs.items())]
-            conditions = " AND ".join(
-                f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1)
-            )
-            query += f" WHERE {conditions} "
+        query, values = where(
+            f"SELECT * FROM \"{cls.__table_name__}\" ",
+            kwargs
+        )
 
         if __order__:
             query += __order__.query()
@@ -62,16 +73,14 @@ class BaseDB:
             return await conn.fetchrow(query, *values)
 
     @classmethod
-    async def fetch_many(cls, **kwargs):
-        query = f"SELECT * FROM \"{cls.__table_name__}\" "
-        values = []
+    async def fetch_many(cls, __order__: Order = None, **kwargs):
+        query, values = where(
+            f"SELECT * FROM \"{cls.__table_name__}\" ",
+            kwargs
+        )
 
-        if kwargs:
-            keys, values = [x for x in zip(*kwargs.items())]
-            conditions = " AND ".join(
-                f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1)
-            )
-            query += f" WHERE {conditions} "
+        if __order__:
+            query += __order__.query()
 
         async with cls.__pool__.acquire() as conn:
             return await conn.fetch(query, *values)
@@ -93,17 +102,45 @@ class BaseDB:
         changes = ", ".join(
             f"\"{key}\" = ${i}" for i, key in enumerate(keys, 1)
         )
-        query = f"UPDATE \"{cls.__table_name__}\" SET {changes} "
 
-        if kwargs:
-            keys, values_ = [x for x in zip(*kwargs.items())]
-            conditions = " AND ".join(
-                f"\"{key}\" = ${i}" for i, key in enumerate(keys, len(values) + 1)
-            )
-            query += f" WHERE {conditions} "
-            values += values_
+        query, values_ = where(
+            f"UPDATE \"{cls.__table_name__}\" SET {changes} ",
+            kwargs
+        )
 
+        values += values_
         query += f"RETURNING *;"
 
         async with cls.__pool__.acquire() as conn:
             return await conn.fetch(query, *values)
+
+    @classmethod
+    async def delete(cls, **kwargs):
+        query, values = where(
+            f"DELETE FROM \"{cls.__table_name__}\" ",
+            kwargs
+        )
+
+        async with cls.__pool__.acquire() as conn:
+            return await conn.fetch(query, *values)
+
+
+def where(query: str, kwargs: Dict[str, Any]):
+    values = []
+
+    if kwargs:
+        i = 1
+        conditions = []
+
+        for key, value in kwargs.items():
+            condition, value, i = (
+                value.query(key, i)
+                if hasattr(value, "query")
+                else f"\"{key}\" = ${i}", value, i + 1
+            )
+            conditions.append(condition)
+            values.append(value)
+
+        query += f" WHERE {' AND '.join(conditions)} "
+
+    return query, values
