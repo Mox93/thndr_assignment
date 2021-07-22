@@ -130,4 +130,4 @@ async def resolve_sellers(stock: Stock) -> Stock:
         await SellDB.delete(stock_id=stock.stock_id, user_id=seller.user_id)
         await add_funds(seller.user_id, total_price)
 
-        return stock
+    return stock

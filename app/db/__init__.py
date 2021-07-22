@@ -89,7 +89,7 @@ class BaseDB:
     async def insert(cls, data: Dict[str, Any]):
         keys, values = [x for x in zip(*data.items())]
         query = f"""
-        INSERT INTO {cls.__table_name__} ({", ".join(keys)})
+        INSERT INTO "{cls.__table_name__}" ({", ".join(keys)})
         VALUES ({", ".join(f"${i + 1}" for i in range(len(values)))})
 """
 
@@ -105,10 +105,11 @@ class BaseDB:
 
         query, values_ = where(
             f"UPDATE \"{cls.__table_name__}\" SET {changes} ",
-            kwargs
+            kwargs,
+            len(values) + 1
         )
 
-        values += values_
+        values = (*values, *values_)
         query += f"RETURNING *;"
 
         async with cls.__pool__.acquire() as conn:
@@ -125,19 +126,18 @@ class BaseDB:
             return await conn.fetch(query, *values)
 
 
-def where(query: str, kwargs: Dict[str, Any]):
+def where(query: str, kwargs: Dict[str, Any], i: int = 1):
     values = []
 
     if kwargs:
-        i = 1
         conditions = []
 
         for key, value in kwargs.items():
-            condition, value, i = (
-                value.query(key, i)
-                if hasattr(value, "query")
-                else f"\"{key}\" = ${i}", value, i + 1
-            )
+            if hasattr(value, "query"):
+                condition, value, i = value.query(key, i)
+            else:
+                condition, value, i = f"\"{key}\" = ${i}", value, i + 1
+
             conditions.append(condition)
             values.append(value)
 

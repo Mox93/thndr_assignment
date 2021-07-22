@@ -5,6 +5,7 @@ from .db.user import UserDB
 from .models.stock import Stock
 from .models.user import UserCreate, UserInDB
 from .utils.trade import resolve_sellers, resolve_buyers
+from .utils.user import get_user
 
 
 internal = FastAPI()
@@ -33,3 +34,5 @@ async def add_test_user(info: UserCreate):
     user_db = UserInDB(id=info.user_id, name=info.name, balance=0)
 
     await UserDB.insert(user_db.dict())
+
+    return await get_user(user_id=info.user_id)
