@@ -23,6 +23,11 @@ class Order:
         return f" ORDER BY {columns} {type_} "
 
 
+class All(tuple):
+    def __new__(cls, *values):
+        return super(All, cls).__new__(cls, values)
+
+
 class Le:
     def __init__(self, value):
         self.value = value
@@ -133,14 +138,26 @@ def where(query: str, kwargs: Dict[str, Any], i: int = 1):
         conditions = []
 
         for key, value in kwargs.items():
-            if hasattr(value, "query"):
-                condition, value, i = value.query(key, i)
-            else:
-                condition, value, i = f"\"{key}\" = ${i}", value, i + 1
+            if type(value) == All:
+                for val in value:
+                    condition, value, i = to_query(key, val, i)
 
-            conditions.append(condition)
-            values.append(value)
+                    conditions.append(condition)
+                    values.append(value)
+
+            else:
+                condition, value, i = to_query(key, value, i)
+
+                conditions.append(condition)
+                values.append(value)
 
         query += f" WHERE {' AND '.join(conditions)} "
 
     return query, values
+
+
+def to_query(key: str, value: Any, i: int) -> Tuple[str, Any, int]:
+    if hasattr(value, "query"):
+        return value.query(key, i)
+    else:
+        return f"\"{key}\" = ${i}", value, i + 1

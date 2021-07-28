@@ -1,6 +1,8 @@
+from typing import Union
+
 from fastapi import APIRouter
 
-from ..models.stock import Stock, StockRequest
+from ..models.stock import Stock, StockDuration, StockRequest
 from ..models.user import User, UserRequest
 from ..utils.user import get_user
 from ..utils.stock import get_stock
@@ -9,9 +11,9 @@ from ..utils.stock import get_stock
 router = APIRouter(tags=["Info"])
 
 
-@router.post("/stock", response_model=Stock)
-async def stock(info: StockRequest) -> Stock:
-    return await get_stock(info.stock_id)
+@router.post("/stock", response_model=Union[Stock, StockDuration])
+async def stock(info: StockRequest) -> Union[Stock, StockDuration]:
+    return await get_stock(info)
 
 
 @router.post("/user", response_model=User)
