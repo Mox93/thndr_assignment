@@ -7,19 +7,16 @@ from ..db import Le, Ge
 from ..db.stock import OwnedStockDB
 from ..db.trade import BuyDB, SellDB
 from ..db.user import UserDB
-from ..models.actions import Buy, BuyInDB, Sell, SellInDB
+from ..models.actions import BuyCreate, BuyInDB, SellCreate, SellInDB
 from ..models.stock import Stock
 from ..models.user import User
 
 
-# TODO add pending trade to user
-
-
-async def buy_stock(info: Buy) -> User:
+async def buy_stock(info: BuyCreate) -> User:
     await get_stock(info.stock_id)
 
     max_funds = info.upper_bound * info.total
-    user = await remove_funds(info.user_id, max_funds)
+    await remove_funds(info.user_id, max_funds)
 
     stock_to_buy = BuyInDB(
         user_id=info.user_id,
@@ -31,10 +28,10 @@ async def buy_stock(info: Buy) -> User:
     )
     await BuyDB.insert(stock_to_buy.dict())
 
-    return user
+    return await get_user(info.user_id)
 
 
-async def sell_stock(info: Sell) -> User:
+async def sell_stock(info: SellCreate) -> User:
     await get_stock(info.stock_id)
 
     user = await get_user(info.user_id)
@@ -58,7 +55,7 @@ async def sell_stock(info: Sell) -> User:
 
     await SellDB.insert(stock_to_sell.dict())
 
-    return user
+    return await get_user(info.user_id)
 
 
 async def resolve_buyers(stock: Stock) -> Stock:

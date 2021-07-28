@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from .actions import Buy, Sell
 from .stock import OwnedStock
 
 
@@ -17,6 +18,8 @@ class UserCreate(UserRequest):
 class User(UserCreate):
     balance: float
     stock: List[OwnedStock]
+    pending_buys: List[Buy]
+    pending_sells: List[Sell]
 
 
 class UserInDB(BaseModel):

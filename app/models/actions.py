@@ -13,25 +13,36 @@ class Withdraw(BaseModel):
     amount: float
 
 
-class Trade(BaseModel):
-    user_id: UUID
+class BaseTrade(BaseModel):
     stock_id: UUID
     total: int
     upper_bound: float
     lower_bound: float
 
 
-class Buy(Trade):
+class Trade(BaseTrade):
+    user_id: UUID
+
+
+class BuyCreate(Trade):
     pass
 
 
-class BuyInDB(Buy):
+class Buy(BaseTrade):
     funds: float
 
 
-class Sell(Trade):
+class BuyInDB(BuyCreate, Buy):
     pass
 
 
-class SellInDB(Sell):
+class SellCreate(Trade):
+    pass
+
+
+class Sell(BaseTrade):
+    pass
+
+
+class SellInDB(SellCreate):
     pass

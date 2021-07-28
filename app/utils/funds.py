@@ -19,7 +19,9 @@ async def add_funds(user_id: UUID, amount: float) -> User:
         user_id=user_db.id,
         name=user_db.name,
         balance=user_db.balance,
-        stock=user.stock
+        stock=user.stock,
+        pending_buys=user.pending_buys,
+        pending_sells=user.pending_sells,
     )
 
 
@@ -39,5 +41,7 @@ async def remove_funds(user_id: UUID, amount: float) -> User:
         user_id=user_db.id,
         name=user_db.name,
         balance=user_db.balance,
-        stock=user.stock
+        stock=user.stock,
+        pending_buys=user.pending_buys,
+        pending_sells=user.pending_sells,
     )
